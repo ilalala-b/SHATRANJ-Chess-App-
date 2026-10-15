@@ -118,9 +118,10 @@ public class ChessController {
 
     private final SavedGame savedGame = new SavedGame();
 
-    private boolean modeExpanded = true;
-    private boolean gameExpanded = true;
+    private boolean modeExpanded = false;
+    private boolean gameExpanded = false;
     private boolean themeExpanded = false;
+    private boolean timeExpanded = false;
 
     private String lightColor() {
         switch (theme) {
@@ -229,11 +230,11 @@ public class ChessController {
         card.setPadding(new Insets(40, 60, 40, 60));
         card.setMaxWidth(420);
 
-        Label title = new Label("SHATRANJ");
+        Label title = new Label("CHESS");
         title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 52));
         title.setStyle("-fx-text-fill: #f5c542;");
 
-        Label sub = new Label("A class project by Group 1");
+        Label sub = new Label("A class project by you");
         sub.setStyle("-fx-text-fill: #9a9a9a; -fx-font-size: 13px;");
 
         Button startBtn = new Button("Start Game");
@@ -572,6 +573,25 @@ public class ChessController {
             gameSection.getChildren().addAll(newGameBtn, pauseBtn, quitBtn);
         }
 
+        VBox timeSection = collapsibleSection("TIME CONTROL", timeExpanded, () -> timeExpanded = !timeExpanded);
+        if (timeExpanded) {
+            HBox row1 = new HBox(6);
+            Button bulletBtn = timeButton("Bullet", 60);
+            Button blitzBtn = timeButton("Blitz", 180);
+            HBox.setHgrow(bulletBtn, Priority.ALWAYS);
+            HBox.setHgrow(blitzBtn, Priority.ALWAYS);
+            row1.getChildren().addAll(bulletBtn, blitzBtn);
+
+            HBox row2 = new HBox(6);
+            Button rapidBtn = timeButton("Rapid", 600);
+            Button classicBtn = timeButton("Classic", 1800);
+            HBox.setHgrow(rapidBtn, Priority.ALWAYS);
+            HBox.setHgrow(classicBtn, Priority.ALWAYS);
+            row2.getChildren().addAll(rapidBtn, classicBtn);
+
+            timeSection.getChildren().addAll(row1, row2);
+        }
+
         VBox themeSection = collapsibleSection("THEME", themeExpanded, () -> themeExpanded = !themeExpanded);
         if (themeExpanded) {
             HBox themeRow = new HBox(6);
@@ -590,7 +610,7 @@ public class ChessController {
         closeBtn.setStyle(SIDE_BTN_BASE);
         closeBtn.setOnAction(e -> closeDrawer());
 
-        drawer.getChildren().addAll(modeSection, gameSection, themeSection, closeBtn);
+        drawer.getChildren().addAll(modeSection, gameSection, timeSection, themeSection, closeBtn);
 
         drawerOverlay.getChildren().add(drawer);
         rootStack.getChildren().add(drawerOverlay);
@@ -636,6 +656,19 @@ public class ChessController {
         b.setStyle(active ? TIME_BTN_ACTIVE : TIME_BTN_BASE);
         b.setMaxWidth(Double.MAX_VALUE);
         b.setOnAction(e -> { theme = t; closeDrawer(); redrawBoard(); });
+        return b;
+    }
+
+    private Button timeButton(String text, int seconds) {
+        Button b = new Button(text);
+        boolean active = (startingTime == seconds);
+        b.setStyle(active ? TIME_BTN_ACTIVE : TIME_BTN_BASE);
+        b.setMaxWidth(Double.MAX_VALUE);
+        b.setOnAction(e -> {
+            startingTime = seconds;
+            closeDrawer();
+            resetGame();
+        });
         return b;
     }
 
